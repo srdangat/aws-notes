@@ -87,6 +87,22 @@ Three options to access AWS:
 
 ---
 
+## Permission Boundaries
+
+- A permission boundary defines the maximum permissions an IAM user or role can have.
+
+### Important:
+
+- Permission boundary does not grant permissions by itself.
+- It only limits the maximum possible permissions.
+- Effective permission is the intersection of identity policy and permission boundary.
+
+### Example:
+
+If the identity policy allows only `s3:GetObject`, and the permission boundary allows `s3:*`, the user can still only do `s3:GetObject`.
+
+---
+
 ## IAM Guidelines & Best Practices
 
 - Don't use the root account except for AWS account setup
