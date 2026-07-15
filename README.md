@@ -24,5 +24,6 @@
 | [Monitoring & Logging](./14_CloudWatch_CloudTrail_Athena.md) | CloudWatch, CloudTrail, Athena |
 | [Systems Manager](./15_Systems_Manager.md) | SSM tools, automation |
 | [Lambda](./16_Lambda.md) | Serverless computing |
+| [Organizations](./17_Organizations.md) | Multi-Account Strategy |
 
 ---
