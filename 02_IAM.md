@@ -117,6 +117,58 @@ If the identity policy allows only `s3:GetObject`, and the permission boundary a
 
 ---
 
+# AWS IAM Policy Evaluation Cheat Sheet
+
+## The Golden Rule: **D.O.Y.**
+Use this mnemonic to trace the evaluation path:
+1. **D - Deny**: Check for **Explicit Deny** first.  If found in *any* policy, access is **immediately blocked**.
+2. **O - Org**: Check **Organization Policies** (SCPs/RCPs).  These act as filters; if the Org doesn't allow it, you can't have it.
+3. **Y - You**: Check **Identity Policies** (User/Role), **Permissions Boundaries**, and **Session Policies**.  You need an **Explicit Allow** here to proceed.
+
+---
+
+## The Three States of Access
+| State | Description | Outcome |
+| :--- | :--- | :--- |
+| **Implicit Deny** | Default state.  No policy explicitly says "Allow". | ❌ **Denied** |
+| **Explicit Allow** | A policy statement has `"Effect": "Allow"`.  | ✅ **Allowed** (if no Deny exists) |
+| **Explicit Deny** | A policy statement has `"Effect": "Deny"`.  | 🛑 **Denied** (Always Wins) |
+
+---
+
+## Evaluation Order (Step-by-Step)
+When a request is made, AWS evaluates policies in this logical sequence:
+
+1. **Explicit Deny?** → Is there a "Deny" anywhere?  → **STOP (Denied)**.
+2. **Service Control Policies (SCPs)** → Does the Organization allow this?  → If no, **Denied**.
+3. **Resource Policies** → (If applicable, e.g., S3 Bucket Policy) Does the resource allow it?
+4. **Permissions Boundaries** → Is the action within the user's max permission limit?
+5. **Session Policies** → Do temporary session limits allow it?
+6. **Identity Policies** → Does the user/role policy explicitly "Allow" it?  → If yes, **Allowed**.
+
+> **Note**: If you reach the end without an Explicit Allow, the result is **Implicit Deny**. 
+
+---
+
+## Key Precedence Rules
+- **Explicit Deny > Explicit Allow**: A single "Deny" statement trumps all "Allow" statements combined.
+- **Union of Allows**: For most services, if *either* the Identity Policy *or* the Resource Policy allows the action (and nothing denies it), access is granted. 
+- **Intersection of Boundaries**: Permissions Boundaries and SCPs act as **filters**.  They cannot grant permissions; they can only restrict what Identity Policies are allowed to grant. 
+
+---
+
+## Quick Summary Table
+
+| Policy Type | Can Grant Permissions? | Can Deny Permissions? | Logic Type |
+| :--- | :---: | :---: | :--- |
+| **Identity Policy** | ✅ Yes | ✅ Yes | Union (with Resource Policy) |
+| **Resource Policy** | ✅ Yes | ✅ Yes | Union (with Identity Policy) |
+| **Permissions Boundary** | ❌ No | ✅ Yes | Intersection (Filter) |
+| **SCP / RCP** | ❌ No | ✅ Yes | Intersection (Filter) |
+| **Session Policy** | ❌ No | ✅ Yes | Intersection (Filter) |   
+
+---
+
 ## IAM Soft Limits
 
 | Resource | Limit |
