@@ -1,4 +1,4 @@
-# VPC Basics — Networking Fundamentals
+# VPC Basics Networking Fundamentals
 
 ## IP Addressing
 
